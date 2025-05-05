@@ -10,34 +10,51 @@ import {
 } from "react-icons/rx";
 import { FaYoutube } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
-import { Socials } from "@/constants";
+
+// Define types
+interface Social {
+  name: string;
+  link: string;
+  icon?: React.ReactNode;
+}
+
+interface MousePosition {
+  x: number;
+  y: number;
+}
+
+interface MouseMoveEvent extends MouseEvent {
+  clientX: number;
+  clientY: number;
+}
+
+// Social links data
+const Socials: Social[] = [
+  { name: "GitHub", link: "https://github.com/your-username", icon: <RxGithubLogo /> },
+  { name: "LinkedIn", link: "https://linkedin.com/in/your-profile", icon: <RxLinkedinLogo /> },
+  { name: "Twitter", link: "https://twitter.com/your-handle", icon: <RxTwitterLogo /> },
+  { name: "Discord", link: "https://discord.gg/your-server", icon: <RxDiscordLogo /> },
+];
 
 const Footer = () => {
   const [emailCopied, setEmailCopied] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [mousePosition, setMousePosition] = useState<MousePosition>({ x: 0, y: 0 });
   const [cursorVariant, setCursorVariant] = useState("default");
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Track mouse position for custom cursor
   useEffect(() => {
-    interface MousePosition {
-      x: number;
-      y: number;
-    }
-
-    interface MouseMoveEvent extends MouseEvent {}
-
+    setIsMounted(true);
+    
     const mouseMove = (e: MouseMoveEvent) => {
       setMousePosition({
-      x: e.clientX,
-      y: e.clientY,
+        x: e.clientX,
+        y: e.clientY,
       });
     };
 
     window.addEventListener("mousemove", mouseMove);
-    return () => {
-      window.removeEventListener("mousemove", mouseMove);
-    };
+    return () => window.removeEventListener("mousemove", mouseMove);
   }, []);
 
   // Custom cursor variants
@@ -71,14 +88,20 @@ const Footer = () => {
     },
   };
 
-  const copyEmail = () => {
-    navigator.clipboard.writeText("icoashutosh@gmail.com");
-    setEmailCopied(true);
-    setTimeout(() => setEmailCopied(false), 2000);
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText("icoashutosh@gmail.com");
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy email: ", err);
+    }
   };
 
   // Background particles animation
   const particles = Array.from({ length: 20 }, (_, i) => i);
+
+  if (!isMounted) return null;
 
   return (
     <div className="w-full bg-gradient-to-b from-transparent to-[#0300145e] text-gray-200 shadow-lg p-6 relative overflow-hidden">
@@ -94,13 +117,13 @@ const Footer = () => {
       <div className="absolute inset-0 overflow-hidden z-0">
         {particles.map((i) => (
           <motion.div
-            key={i}
+            key={`particle-${i}`}
             className="absolute rounded-full bg-purple-500/10"
             initial={{
               width: Math.random() * 60 + 10,
               height: Math.random() * 60 + 10,
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * 500,
+              x: isMounted ? Math.random() * window.innerWidth : 0,
+              y: isMounted ? Math.random() * 500 : 0,
               opacity: Math.random() * 0.3,
             }}
             animate={{
@@ -157,6 +180,7 @@ const Footer = () => {
               <motion.a 
                 href="https://youtube.com/your-channel" 
                 target="_blank"
+                rel="noopener noreferrer"
                 whileHover={{ x: 10, color: "#FF0000", scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center my-3 transition-all duration-300 cursor-pointer"
@@ -189,6 +213,7 @@ const Footer = () => {
               <motion.a 
                 href="https://github.com/your-username" 
                 target="_blank"
+                rel="noopener noreferrer"
                 whileHover={{ x: 10, color: "#f5f5f5", scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center my-3 transition-all duration-300 cursor-pointer"
@@ -221,6 +246,7 @@ const Footer = () => {
               <motion.a 
                 href="https://discord.gg/your-server" 
                 target="_blank"
+                rel="noopener noreferrer"
                 whileHover={{ x: 10, color: "#7289DA", scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center my-3 transition-all duration-300 cursor-pointer"
@@ -268,6 +294,7 @@ const Footer = () => {
               <motion.a 
                 href="https://instagram.com/your-handle" 
                 target="_blank"
+                rel="noopener noreferrer"
                 whileHover={{ x: 10, color: "#E1306C", scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center my-3 transition-all duration-300 cursor-pointer"
@@ -300,6 +327,7 @@ const Footer = () => {
               <motion.a 
                 href="https://twitter.com/your-handle" 
                 target="_blank"
+                rel="noopener noreferrer"
                 whileHover={{ x: 10, color: "#1DA1F2", scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center my-3 transition-all duration-300 cursor-pointer"
@@ -332,6 +360,7 @@ const Footer = () => {
               <motion.a 
                 href="https://linkedin.com/in/your-profile" 
                 target="_blank"
+                rel="noopener noreferrer"
                 whileHover={{ x: 10, color: "#0077B5", scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center my-3 transition-all duration-300 cursor-pointer"
@@ -477,9 +506,7 @@ const Footer = () => {
                 onHoverEnd={() => setCursorVariant("default")}
                 className="w-10 h-10 rounded-full bg-[#0300145e] border border-[#7042f861] flex items-center justify-center cursor-pointer hover:bg-[#7042f830] transition-all duration-300"
               >
-                {social.name === "GitHub" && <RxGithubLogo className="text-xl" />}
-                {social.name === "LinkedIn" && <RxLinkedinLogo className="text-xl" />}
-                {social.name === "Twitter" && <RxTwitterLogo className="text-xl" />}
+                {social.icon || social.name.charAt(0)}
               </motion.a>
             ))}
           </motion.div>

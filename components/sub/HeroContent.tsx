@@ -10,14 +10,22 @@ import {
 import { SparklesIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 
+interface MousePosition {
+  x: number;
+  y: number;
+}
+
+interface WindowSize {
+  width: number;
+  height: number;
+}
+
 const HeroContent = () => {
-  // State variables
   const [isHovered, setIsHovered] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+  const [mousePosition, setMousePosition] = useState<MousePosition>({ x: 0, y: 0 });
+  const [windowSize, setWindowSize] = useState<WindowSize>({ width: 0, height: 0 });
   const [isMounted, setIsMounted] = useState(false);
   
-  // Handle component mount and window size
   useEffect(() => {
     setIsMounted(true);
     setWindowSize({
@@ -32,13 +40,7 @@ const HeroContent = () => {
       });
     };
 
-    // Mouse movement tracking
-    interface MouseEventWithClient extends MouseEvent {
-      clientX: number;
-      clientY: number;
-    }
-
-    const handleMouseMove = (e: MouseEventWithClient): void => {
+    const handleMouseMove = (e: MouseEvent): void => {
       setMousePosition({ x: e.clientX, y: e.clientY });
     };
     
@@ -51,41 +53,23 @@ const HeroContent = () => {
     };
   }, []);
 
-  interface MousePosition {
-    x: number;
-    y: number;
-  }
-
-  interface WindowSize {
-    width: number;
-    height: number;
-  }
-
   const calculateMovement = (axis: 'x' | 'y', strength: number = 10): number => {
     if (!isMounted) return 0;
     
     const center = axis === 'x' ? windowSize.width / 2 : windowSize.height / 2;
     const position = axis === 'x' ? mousePosition.x : mousePosition.y;
-    const movement = (position - center) / strength;
-    return movement;
+    return (position - center) / strength;
   };
 
-  // Generate random position within window bounds
-  interface GetRandomPosition {
-    (dimension: 'width' | 'height'): number;
-  }
-
-  const getRandomPosition: GetRandomPosition = (dimension) => {
+  const getRandomPosition = (dimension: 'width' | 'height'): number => {
     if (!isMounted) return 0;
     return Math.random() * (dimension === 'width' ? windowSize.width : windowSize.height);
   };
 
   return (
     <div className="relative overflow-hidden w-full">
-      {/* Background gradient effect */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#0d0d1d] to-[#16061c] opacity-90"></div>
       
-      {/* Animated particles - Only render on client side */}
       {isMounted && (
         <div className="absolute inset-0 z-10">
           {[...Array(20)].map((_, i) => (
